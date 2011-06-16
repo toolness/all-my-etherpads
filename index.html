@@ -5,88 +5,104 @@
 <title>All My Etherpads</title>
 <script src="jquery.min.js"></script>
 <script src="jquery.mobile-1.0a4.1.min.js"></script>
+<script src="event-emitter.js"></script>
 <script>
 function makeHash(url) {
   url = url.replace(/[:\/]/g, '_');
   return url.replace(/\./g, "dot");
 }
 
+function EtherpadPage(options) {
+  var url = options.url;
+  var server = options.server;
+  var id = makeHash(url);
+    var page = $('#templates div.detail').clone();
+  
+  page.attr('id', id);
+  $('div#detail-pages').append(page);
+
+  // This is a weird thing we need to do in order for the new page
+  // to exist and be linkable.
+  page.attr('data-url', id).page();    
+  
+  page.find('h1').text(url);
+  page.find('.open').attr('href', url);
+  
+  var self = {
+    load: function load() {
+      jQuery.mobile.pageLoading();
+      
+      var response = server.load(url);
+      response.on('error', function(reason) {
+        jQuery.mobile.pageLoading(true);
+        alert("TODO: ERROR " + reason);
+      });
+      response.on('load', function(etherpad) {
+        jQuery.mobile.pageLoading(true);
+        var newItem = $('<li></li>');
+        var link = $('<a></a>');
+        var aside = $('<p class="ui-li-aside"></p>');
+        newItem.attr("id", "item-" + id);
+        aside.text("Last synced on " + etherpad.lastSync);
+        link.attr('href', "#" + id);
+        link.text(url);
+        link.append(aside);
+        newItem.append(link);
+        $("#etherpads").append(newItem);
+        page.find('.pad-content').html(etherpad.html);
+        $("#etherpads").data('listview').refresh();
+      });
+    },
+    resync: function resync() {
+      alert("TODO: resync");
+    },
+    remove: function remove() {
+      $("li#item-" + id).remove();
+      $("#etherpads").data('listview').refresh();
+      // TODO: What if the user is already at the home page?
+      jQuery.mobile.changePage("home");
+    }
+  };
+
+  page.find('.resync').click(self.resync);
+  page.find('.remove').click(self.remove);
+
+  return self;
+}
+
 $(window).ready(function() {
+  var fakeServer = {
+    load: function(url) {
+      var response = jQuery.eventEmitter({});
+      setTimeout(function() {
+        jQuery.get("example-response.html", function(html) {
+          response.emit('load', {
+            lastSync: new Date(),
+            html: html
+          });
+        }, "text");
+      }, 1000);
+      return response;
+    }
+  };
+
   function clearForm() {
     $("#url").val('');
-  }
-
-  function addPage(page) {
-    var pages = $('div#detail-pages');
-    pages.append(page);
-
-    // This is a weird thing we need to do in order for the new page
-    // to exist and be linkable.
-    page.attr('data-url', page.attr('id')).page();    
-  }
-  
-  function makeDetailPage(id) {
-    var page = $('#templates div.detail').clone();
-    page.attr('id', id);
-    addPage(page);
-    return page;    
-  }
-  
-  function fillDetailPage(page, url, contents) {
-    page.find('h1').text(url);
-    page.find('.pad-content').html(contents);
-    page.find('.open').attr('href', url);
-    page.find('.resync').click(function() {
-      alert("TODO: RESYNC");
-    });
-    page.find('.remove').click(function() {
-      $("li#item-" + page.attr("id")).remove();
-      $("#etherpads").data('listview').refresh();
-      jQuery.mobile.changePage("home");
-    });
-    return page;
-  }
-
-  function addEtherpad(page, url) {
-    jQuery.mobile.pageLoading();
-
-    function onEtherpadLoaded(content) {
-      var newItem = $('<li></li>');
-      var link = $('<a></a>');
-      var aside = $('<p class="ui-li-aside"></p>');
-      newItem.attr("id", "item-" + page.attr('id'));
-      aside.text("Last synced on August 24, 2001");
-      link.attr('href', "#" + page.attr('id'));
-      link.text(url);
-      link.append(aside);
-      newItem.append(link);
-      $("#etherpads").append(newItem);
-      fillDetailPage(page, url, content);
-      $("#etherpads").data('listview').refresh();
-    }
-
-    setTimeout(function() {
-      jQuery.mobile.pageLoading(true);
-      onEtherpadLoaded("Lorem Ipsum " + url);
-    }, 1000);
   }
 
   $("form#add-pad").submit(function() {
     var url = $("#url").val();
     if (url.length) {
-      var page = makeDetailPage(makeHash(url));      
-      addEtherpad(page, url);
+      var page = EtherpadPage({
+        url: url,
+        server: fakeServer
+      });
+      page.load();
       clearForm();
     }
     return false;
   });
 
-  (function() {
-    var url = 'http://lol.com';
-    var page = makeDetailPage(makeHash(url));
-    addEtherpad(page, url);
-  })();
-  
   // Not sure how to display a dynamically-generated
   // page on page load, so we'll reset the hash to the
   // home page until we figure out how to do that.
