@@ -91,35 +91,35 @@ function EtherpadPage(options) {
   return self;
 }
 
-$(window).ready(function() {
-  var fakeServer = {
-    DELAY: 1000,
-    load: function(url) {
-      var response = jQuery.eventEmitter({});
-      setTimeout(function() {
-        if (url == "http://etherpad.mozilla.org:9000/hai2u") {
-          jQuery.get("example-response.html", function(html) {
-            response.emit('load', {
-              lastSync: new Date(),
-              html: html
-            });
-          }, "text");
-        } else
-          response.emit('error', "Etherpad not found.");
-      }, this.DELAY);
-      return response;
-    },
-    remove: function(url) {
-      var response = jQuery.eventEmitter({});
-      
-      setTimeout(function() {
-        response.emit('done');
-      }, this.DELAY);
-      
-      return response;
-    }
-  };
+var fakeServer = {
+  DELAY: 1000,
+  load: function(url) {
+    var response = jQuery.eventEmitter({});
+    setTimeout(function() {
+      if (url == "http://etherpad.mozilla.org:9000/hai2u") {
+        jQuery.get("example-response.html", function(html) {
+          response.emit('load', {
+            lastSync: new Date(),
+            html: html
+          });
+        }, "text");
+      } else
+        response.emit('error', "Etherpad not found.");
+    }, this.DELAY);
+    return response;
+  },
+  remove: function(url) {
+    var response = jQuery.eventEmitter({});
+    
+    setTimeout(function() {
+      response.emit('done');
+    }, this.DELAY);
+    
+    return response;
+  }
+};
 
+$(window).ready(function() {
   function clearForm() {
     $("#url").val('');
   }
