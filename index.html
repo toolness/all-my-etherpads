@@ -71,10 +71,17 @@ function EtherpadPage(options) {
       });
     },
     remove: function remove() {
-      $("li#item-" + id).remove();
-      $("#etherpads").data('listview').refresh();
-      // TODO: What if the user is already at the home page?
-      jQuery.mobile.changePage("home");
+      jQuery.mobile.pageLoading();
+
+      var response = server.remove(url);
+
+      response.on('done', function() {
+        jQuery.mobile.pageLoading(true);
+        $("li#item-" + id).remove();
+        $("#etherpads").data('listview').refresh();
+        // TODO: What if the user is already at the home page?
+        jQuery.mobile.changePage("home");
+      });
     }
   };
 
@@ -86,6 +93,7 @@ function EtherpadPage(options) {
 
 $(window).ready(function() {
   var fakeServer = {
+    DELAY: 1000,
     load: function(url) {
       var response = jQuery.eventEmitter({});
       setTimeout(function() {
@@ -98,7 +106,16 @@ $(window).ready(function() {
           }, "text");
         } else
           response.emit('error', "Etherpad not found.");
-      }, 1000);
+      }, this.DELAY);
+      return response;
+    },
+    remove: function(url) {
+      var response = jQuery.eventEmitter({});
+      
+      setTimeout(function() {
+        response.emit('done');
+      }, this.DELAY);
+      
       return response;
     }
   };
