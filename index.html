@@ -119,7 +119,78 @@ var fakeServer = {
   }
 };
 
+// Taken from http://stackoverflow.com/questions/736513/how-do-i-parse-a-url-into-hostname-and-path-in-javascript
+var getLocation = function(href) {
+  var l = document.createElement("a");
+  l.href = href;
+  return l
+}
+
+function RealServer(options) {
+  if (!options)
+    options = {};
+
+  var network = options.network || jQuery;
+  var gateway = options.gateway || "http://etherpad-export.appspot.com/";
+
+  var self = {
+    load: function(url) {
+      var loc = getLocation(url);
+      var params = {
+        server: loc.hostname,
+        port: loc.port,
+        pad: loc.pathname.slice(1),
+        format: "html"
+      };
+
+      if (params.port == "0")
+        params.port = "80";
+
+      var response = jQuery.eventEmitter({});
+
+      network.ajax({
+        type: 'GET',
+        crossDomain: true,
+        url: gateway,
+        data: params,
+        dataType: "text",
+        error: function(jqXHR, textStatus, errorThrown) {
+          var msg = "Fetching the pad failed.";
+          
+          if (jqXHR.status == 404) {
+            msg = "No pad exists at that url.";
+          }
+          
+          response.emit('error', msg);
+        },
+        success: function(data) {
+          response.emit('load', {
+            lastSync: new Date(),
+            html: data
+          });
+        },
+        timeout: 10000        
+      });
+
+      return response;
+    },
+    remove: function(url) {
+      var response = jQuery.eventEmitter({});
+
+      setTimeout(function() {
+        response.emit('done');
+      }, 0);
+
+      return response;
+    }
+  };
+  
+  return self;
+}
+
 $(window).ready(function() {
+  var server = RealServer();
+
   function clearForm() {
     $("#url").val('');
   }
@@ -129,7 +200,7 @@ $(window).ready(function() {
     if (url.length) {
       var page = EtherpadPage({
         url: url,
-        server: fakeServer
+        server: server
       });
       page.load();
       clearForm();
