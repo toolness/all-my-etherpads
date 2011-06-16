@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html manifest="cache.manifest">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1, maximum-scale=1">
+<title>All My Etherpads</title>
+<script src="jquery.min.js"></script>
+<script src="jquery.mobile-1.0a4.1.min.js"></script>
+<script>
+function makeHash(url) {
+  url = url.replace(/[:\/]/g, '_');
+  return url.replace(/\./g, "dot");
+}
+
+$(window).ready(function() {
+  function clearForm() {
+    $("#url").val('');
+  }
+
+  function addPage(page) {
+    var pages = $('div#detail-pages');
+    pages.append(page);
+
+    // This is a weird thing we need to do in order for the new page
+    // to exist and be linkable.
+    page.attr('data-url', page.attr('id')).page();    
+  }
+  
+  function makeDetailPage(id) {
+    var page = $('#templates div.detail').clone();
+    page.attr('id', id);
+    addPage(page);
+    return page;    
+  }
+  
+  function fillDetailPage(page, url, contents) {
+    page.find('h1').text(url);
+    page.find('.pad-content').html(contents);
+    page.find('.open').attr('href', url);
+    page.find('.resync').click(function() {
+      alert("TODO: RESYNC");
+    });
+    page.find('.remove').click(function() {
+      $("li#item-" + page.attr("id")).remove();
+      $("#etherpads").data('listview').refresh();
+      jQuery.mobile.changePage("home");
+    });
+    return page;
+  }
+
+  function addEtherpad(page, url) {
+    jQuery.mobile.pageLoading();
+
+    function onEtherpadLoaded(content) {
+      var newItem = $('<li></li>');
+      var link = $('<a></a>');
+      var aside = $('<p class="ui-li-aside"></p>');
+      newItem.attr("id", "item-" + page.attr('id'));
+      aside.text("Last synced on August 24, 2001");
+      link.attr('href', "#" + page.attr('id'));
+      link.text(url);
+      link.append(aside);
+      newItem.append(link);
+      $("#etherpads").append(newItem);
+      fillDetailPage(page, url, content);
+      $("#etherpads").data('listview').refresh();
+    }
+
+    setTimeout(function() {
+      jQuery.mobile.pageLoading(true);
+      onEtherpadLoaded("Lorem Ipsum " + url);
+    }, 1000);
+  }
+
+  $("form#add-pad").submit(function() {
+    var url = $("#url").val();
+    if (url.length) {
+      var page = makeDetailPage(makeHash(url));      
+      addEtherpad(page, url);
+      clearForm();
+    }
+    return false;
+  });
+
+  (function() {
+    var url = 'http://lol.com';
+    var page = makeDetailPage(makeHash(url));
+    addEtherpad(page, url);
+  })();
+  
+  // Not sure how to display a dynamically-generated
+  // page on page load, so we'll reset the hash to the
+  // home page until we figure out how to do that.
+  window.location.hash = "#home";
+});
+</script>
+<style>
+@import url('jquery.mobile-1.0a4.1.min.css');
+</style>
+<div data-role="page" id="home">
+  <div data-role="header">
+    <h1>All My Etherpads</h1>
+  </div>
+  <div data-role="content">
+    <ul id="etherpads" data-role="listview" data-theme="c">
+    </ul>
+    <form id="add-pad">
+      <h2>Add a Pad</h2>
+      <div data-role="fieldcontain">
+          <label for="url">Etherpad URL:</label>
+          <input type="text" name="url" id="url" value=""  />
+          <input type="submit" value="Add" /> 
+      </div>
+    </form>
+  </div>
+</div>
+<div id="detail-pages"></div>
+<div id="templates" style="display: none">
+  <div data-role="page" class="detail">
+    <div data-role="header">
+      <h1>hallo</h1>
+      <a href="#home" data-icon="home" data-iconpos="notext" data-direction="reverse" class="ui-btn-right jqm-home">Home</a>
+    </div>
+    <div data-role="content">
+      <div data-role="controlgroup">
+        <a class="open" href="http://google.com/" target="_blank" data-role="button">Open In Etherpad</a>
+        <input type="button" value="Re-Sync" class="resync"></input>
+        <input type="button" value="Remove" class="remove"></input>
+      </div>
+      <div class="pad-content"></div>
+    </div>
+  </div>
+</div>
+</html>
