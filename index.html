@@ -30,7 +30,8 @@ function EtherpadPage(options) {
   var url = options.url;
   var server = options.server;
   var id = makeHash(url);
-    var page = $('#templates div.detail').clone();
+  var page = $('#templates div.detail').clone();
+  var listItem = null;
   
   page.attr('id', id);
   $('div#detail-pages').append(page);
@@ -41,6 +42,19 @@ function EtherpadPage(options) {
   
   page.find('h1').text(url);
   page.find('.open').attr('href', url);
+  
+  function update(etherpad) {
+    if (!listItem) {
+      listItem = $('#templates .list-item').clone();
+      listItem.attr("id", "item-" + id);
+      listItem.find("a").attr('href', "#" + id);
+      listItem.find("div.title").text(url);
+      $("#etherpads").append(listItem);
+      $("#etherpads").data('listview').refresh();
+    }
+    listItem.find(".last-sync").text(etherpad.lastSync.toString());
+    page.find('.pad-content').html(etherpad.html);
+  }
   
   var self = {
     load: function load() {
@@ -53,22 +67,8 @@ function EtherpadPage(options) {
       });
       response.on('load', function(etherpad) {
         jQuery.mobile.pageLoading(true);
-        var newItem = $('<li></li>');
-        var link = $('<a></a>');
-        var aside = $('<p class="ui-li-aside"></p>');
-        newItem.attr("id", "item-" + id);
-        aside.text("Last synced on " + etherpad.lastSync);
-        link.attr('href', "#" + id);
-        link.text(url);
-        link.append(aside);
-        newItem.append(link);
-        $("#etherpads").append(newItem);
-        page.find('.pad-content').html(etherpad.html);
-        $("#etherpads").data('listview').refresh();
+        update(etherpad);
       });
-    },
-    resync: function resync() {
-      jQuery.showErrorMessage("TODO: Implement this!");
     },
     remove: function remove() {
       $("li#item-" + id).remove();
@@ -78,7 +78,7 @@ function EtherpadPage(options) {
     }
   };
 
-  page.find('.resync').click(self.resync);
+  page.find('.resync').click(self.load);
   page.find('.remove').click(self.remove);
 
   return self;
@@ -158,6 +158,7 @@ $(window).ready(function() {
 </div>
 <div id="detail-pages"></div>
 <div id="templates" style="display: none">
+  <li class="list-item"><a><div class="title"></div><p class="ui-li-aside">Last synced on <span class="last-sync"></span></p></a></li>
   <div data-role="page" class="detail">
     <div data-role="header">
       <h1>hallo</h1>
