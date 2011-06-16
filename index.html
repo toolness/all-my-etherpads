@@ -122,6 +122,10 @@ $(window).ready(function() {
     return false;
   });
 
+  $("input#export-list").click(function() {
+    jQuery.showErrorMessage("TODO: Implement this.");
+  });
+
   // Not sure how to display a dynamically-generated
   // page on page load, so we'll reset the hash to the
   // home page until we figure out how to do that.
@@ -140,12 +144,16 @@ $(window).ready(function() {
     </ul>
     <form id="add-pad">
       <h2>Add a Pad</h2>
+      <p>You can use this form to add an Etherpad to your list, allowing you to easily access it offline on this device.</p>
       <div data-role="fieldcontain">
           <label for="url">Etherpad URL:</label>
           <input type="text" name="url" id="url" value=""  />
           <input type="submit" value="Add" /> 
       </div>
     </form>
+    <h2>Export</h2>
+    <p>Click the button below to generate a URL that can be used to install your list on another device.</p>
+    <input type="button" value="Export List" id="export-list">
   </div>
 </div>
 <div id="detail-pages"></div>
