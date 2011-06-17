@@ -45,4 +45,4 @@ version of the code.
   [All My Etherpads]: http://toolness.github.com/all-my-etherpads/
   [jQuery Mobile]: http://jquerymobile.com/
   [DOM Storage]: https://developer.mozilla.org/en/dom/storage
-  [applicaiton cache]: http://www.w3.org/TR/2008/WD-html5-20080122/#appcache
+  [application cache]: http://www.w3.org/TR/2008/WD-html5-20080122/#appcache
