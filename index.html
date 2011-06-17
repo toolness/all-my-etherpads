@@ -184,7 +184,7 @@ function BasicServer(options) {
         format: "html"
       };
 
-      if (params.port == "0")
+      if (params.port == "0" || params.port == "")
         params.port = "80";
 
       network.ajax({
