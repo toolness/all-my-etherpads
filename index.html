@@ -126,22 +126,36 @@ var getLocation = function(href) {
   return l
 }
 
-function BasicCache() {
-  var cache = {};
+function BasicCache(options) {
+  var cache = options.cache || window.localStorage;
+  var prefix = options.prefix || "BASIC_CACHE_";
   
   var self = {
+    list: function list() {
+      var results = [];
+      for (var name in cache) {
+        if (name.indexOf(prefix) == 0)
+          results.push(name.slice(prefix.length));
+      }
+      return results;
+    },
     has: function has(url) {
-      return (url in cache);
+      return ((prefix+url) in cache);
     },
     get: function get(url, cb) {
-      cb(JSON.parse(cache[url]));
+      cb(JSON.parse(cache[prefix+url]));
     },
     set: function set(url, blob) {
-      cache[url] = JSON.stringify(blob);
+      cache[prefix+url] = JSON.stringify(blob);
     },
     remove: function remove(url, cb) {
-      delete cache[url];
+      delete cache[prefix+url];
       cb();
+    },
+    removeAll: function removeAll() {
+      self.list().forEach(function(url) {
+        self.remove(url, function() {});
+      });
     }
   };
   
@@ -149,14 +163,14 @@ function BasicCache() {
 }
 
 function RealServer(options) {
-  if (!options)
-    options = {};
-
-  var cache = options.cache || BasicCache();
+  var cache = options.cache;
   var network = options.network || jQuery;
   var gateway = options.gateway || "http://etherpad-export.appspot.com/";
 
   var self = {
+    list: function() {
+      return cache.list();
+    },
     load: function(url) {
       var response = jQuery.eventEmitter({});
 
@@ -228,9 +242,10 @@ function RealServer(options) {
   return self;
 }
 
-$(window).ready(function() {
-  var server = RealServer();
+var cache = BasicCache({prefix: "ETHERPADS_"});
+var server = RealServer({cache: cache});
 
+$(window).ready(function() {
   function clearForm() {
     $("#url").val('');
   }
@@ -252,6 +267,14 @@ $(window).ready(function() {
 
   $("input#export-list").click(function() {
     jQuery.showErrorMessage("TODO: Implement this.");
+  });
+
+  server.list().forEach(function(url) {
+    var page = EtherpadPage({
+      url: url,
+      server: server
+    });
+    page.load();    
   });
 
   // Not sure how to display a dynamically-generated
