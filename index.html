@@ -126,15 +126,54 @@ var getLocation = function(href) {
   return l
 }
 
+function BasicCache() {
+  var cache = {};
+  
+  var self = {
+    has: function has(url) {
+      return (url in cache);
+    },
+    get: function get(url, cb) {
+      cb(JSON.parse(cache[url]));
+    },
+    set: function set(url, blob) {
+      cache[url] = JSON.stringify(blob);
+    },
+    remove: function remove(url, cb) {
+      delete cache[url];
+      cb();
+    }
+  };
+  
+  return self;
+}
+
 function RealServer(options) {
   if (!options)
     options = {};
 
+  var cache = options.cache || BasicCache();
   var network = options.network || jQuery;
   var gateway = options.gateway || "http://etherpad-export.appspot.com/";
 
   var self = {
     load: function(url) {
+      var response = jQuery.eventEmitter({});
+
+      function loadCachedResponse() {
+        cache.get(url, function(etherpad) {
+          setTimeout(function() {
+            etherpad.lastSync = new Date(etherpad.lastSync);
+            response.emit('load', etherpad);
+          }, 0);
+        });
+      }
+      
+      if (cache.has(url)) {
+        loadCachedResponse();
+        return response;
+      }
+
       var loc = getLocation(url);
       var params = {
         server: loc.hostname,
@@ -145,8 +184,6 @@ function RealServer(options) {
 
       if (params.port == "0")
         params.port = "80";
-
-      var response = jQuery.eventEmitter({});
 
       network.ajax({
         type: 'GET',
@@ -164,10 +201,11 @@ function RealServer(options) {
           response.emit('error', msg);
         },
         success: function(data) {
-          response.emit('load', {
-            lastSync: new Date(),
+          cache.set(url, {
+            lastSync: (new Date()).toString(),
             html: data
           });
+          loadCachedResponse();
         },
         timeout: 10000        
       });
@@ -177,9 +215,11 @@ function RealServer(options) {
     remove: function(url) {
       var response = jQuery.eventEmitter({});
 
-      setTimeout(function() {
-        response.emit('done');
-      }, 0);
+      cache.remove(url, function() {
+        setTimeout(function() {
+          response.emit('done');
+        }, 0);
+      });
 
       return response;
     }
