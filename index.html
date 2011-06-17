@@ -6,6 +6,7 @@
 <script src="jquery.min.js"></script>
 <script src="jquery.mobile-1.0a4.1.min.js"></script>
 <script src="event-emitter.js"></script>
+<script src="pretty-date.js"></script>
 <script>
 function makeHash(url) {
   url = url.replace(/[:\/]/g, '_');
@@ -38,6 +39,10 @@ function getQueryVariable(variable) {
     }
     return null;
 }
+
+setInterval(function() {
+  $("#etherpads .last-sync").prettyDate();
+}, 10000);
 
 function EtherpadPage(options) {
   var url = options.url;
@@ -79,7 +84,8 @@ function EtherpadPage(options) {
       $("#etherpads").append(listItem);
       $("#etherpads").data('listview').refresh();
     }
-    listItem.find(".last-sync").text(etherpad.lastSync.toString());
+    listItem.find(".last-sync").attr("title", etherpad.lastSync.toString())
+            .prettyDate();
     page.find('.pad-content').html(etherpad.html)
         .find("title").prevAll().andSelf().remove();
     page.find('.pad-content a').attr("target", "_blank");
@@ -358,7 +364,7 @@ $(window).ready(function() {
 </div>
 <div id="detail-pages"></div>
 <div id="templates" style="display: none">
-  <li class="list-item"><a><h3 class="name"></h3><p><strong class="server"></strong></p><p class="excerpt"></p><p class="ui-li-aside">Last synced on <span class="last-sync"></span></p></a></li>
+  <li class="list-item"><a><h3 class="name"></h3><p><strong class="server"></strong></p><p class="excerpt"></p><p class="ui-li-aside">Last synced <span class="last-sync"></span></p></a></li>
   <div data-role="page" class="detail">
     <div data-role="header">
       <h1>hallo</h1>
