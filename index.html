@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html manifest="cache.manifest">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1, maximum-scale=1">
 <title>All My Etherpads</title>
@@ -351,6 +352,8 @@ $(window).ready(function() {
 <style>
 @import url('jquery.mobile-1.0a4.1.min.css');
 </style>
+</head>
+<body>
 <div data-role="page" id="home">
   <div data-role="header">
     <h1>All My Etherpads</h1>
@@ -385,11 +388,12 @@ $(window).ready(function() {
     <div data-role="content">
       <div data-role="controlgroup">
         <a class="open" href="http://google.com/" target="_blank" data-role="button">Open In Etherpad</a>
-        <input type="button" value="Re-Sync" class="resync"></input>
-        <input type="button" value="Remove" class="remove"></input>
+        <input type="button" value="Re-Sync" class="resync">
+        <input type="button" value="Remove" class="remove">
       </div>
       <div class="pad-content"></div>
     </div>
   </div>
 </div>
+</body>
 </html>
