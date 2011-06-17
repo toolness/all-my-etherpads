@@ -299,12 +299,16 @@ $(window).ready(function() {
   $("form#add-pad").submit(function() {
     var url = $("#url").val();
     if (url.length) {
-      var page = EtherpadPage({
-        url: url,
-        server: server
-      });
-      page.load(true);
-      clearForm();
+      if (server.list().indexOf(url) == -1) {
+        var page = EtherpadPage({
+          url: url,
+          server: server
+        });
+        var response = page.load(true);
+        response.on('load', clearForm);
+      } else {
+        jQuery.showErrorMessage("That pad is already in your list.");
+      }
     } else {
       jQuery.showErrorMessage("Please enter a URL.");
     }
