@@ -82,6 +82,7 @@ function EtherpadPage(options) {
     listItem.find(".last-sync").text(etherpad.lastSync.toString());
     page.find('.pad-content').html(etherpad.html)
         .find("title").prevAll().andSelf().remove();
+    page.find('.pad-content a').attr("target", "_blank");
     updateExcerpt();
   }
   
