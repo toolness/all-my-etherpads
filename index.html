@@ -333,7 +333,13 @@ $(window).ready(function() {
   // Not sure how to display a dynamically-generated
   // page on page load, so we'll reset the hash to the
   // home page until we figure out how to do that.
-  window.location.hash = "#home";
+  if (window.location.hash.length && 
+      !window.location.hash.match(/^(#|#home)$/)) {
+    window.location.hash = "#home";
+    // We need to reload the page so that jQuery mobile's
+    // history management doesn't get broken.
+    window.location.reload();
+  }
 
   maybeInstallPages(urls);
 });
