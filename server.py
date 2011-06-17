@@ -3,8 +3,6 @@
 from wsgiref.simple_server import make_server
 from wsgiref.util import FileWrapper
 import os
-import sys
-import shutil
 import mimetypes
 
 DEFAULT_PORT = 8001
@@ -15,8 +13,6 @@ NEW_MIME_TYPES = {
 }
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
-
-ALL_NETWORK_MANIFEST = "CACHE MANIFEST\nNETWORK:\n*\n"
 
 def make_app(options):
     
@@ -37,13 +33,13 @@ def make_app(options):
             os.path.isfile(fullpath) and
             mimetype):
             if mimetype == 'text/cache-manifest' and options.ignore_manifests:
-                print "returning cache manifest with no offline resources."
-                filesize = len(ALL_NETWORK_MANIFEST)
-                start_response('200 OK', [('Content-Type', mimetype),
-                                          ('Content-Length', str(filesize))])
-                return [ALL_NETWORK_MANIFEST]
+                print "cache manifest exists, but pretending it doesn't."
+                start_response('404 Not Found', [('Content-Type', 'text/plain')])
+                return ['The manifest at ', path, 'exists, but this server ',
+                        'is returning 404 because --ignore-cache-manifests is ',
+                        'enabled.']
             else:
-                print "returning original cache manifest file."
+                print "returning existing cache manifest file."
 
             filesize = os.stat(fullpath).st_size
             start_response('200 OK', [('Content-Type', mimetype),
