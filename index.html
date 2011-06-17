@@ -93,34 +93,6 @@ function EtherpadPage(options) {
   return self;
 }
 
-var fakeServer = {
-  DELAY: 1000,
-  load: function(url) {
-    var response = jQuery.eventEmitter({});
-    setTimeout(function() {
-      if (url == "http://etherpad.mozilla.org:9000/hai2u") {
-        jQuery.get("example-response.html", function(html) {
-          response.emit('load', {
-            lastSync: new Date(),
-            html: html
-          });
-        }, "text");
-      } else
-        response.emit('error', "Etherpad not found.");
-    }, this.DELAY);
-    return response;
-  },
-  remove: function(url) {
-    var response = jQuery.eventEmitter({});
-    
-    setTimeout(function() {
-      response.emit('done');
-    }, this.DELAY);
-    
-    return response;
-  }
-};
-
 // Taken from http://stackoverflow.com/questions/736513/how-do-i-parse-a-url-into-hostname-and-path-in-javascript
 var getLocation = function(href) {
   var l = document.createElement("a");
@@ -164,7 +136,7 @@ function BasicCache(options) {
   return self;
 }
 
-function RealServer(options) {
+function BasicServer(options) {
   var cache = options.cache;
   var network = options.network || jQuery;
   var gateway = options.gateway || "http://etherpad-export.appspot.com/";
@@ -245,7 +217,7 @@ function RealServer(options) {
 }
 
 var cache = BasicCache({prefix: "ETHERPADS_"});
-var server = RealServer({cache: cache});
+var server = BasicServer({cache: cache});
 
 $(window).ready(function() {
   function clearForm() {
