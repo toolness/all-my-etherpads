@@ -57,10 +57,10 @@ function EtherpadPage(options) {
   }
   
   var self = {
-    load: function load() {
+    load: function load(forceReload) {
       jQuery.mobile.pageLoading();
       
-      var response = server.load(url);
+      var response = server.load(url, forceReload);
       response.on('error', function(reason) {
         jQuery.mobile.pageLoading(true);
         jQuery.showErrorMessage("Error: " + reason);
@@ -85,7 +85,9 @@ function EtherpadPage(options) {
     }
   };
 
-  page.find('.resync').click(self.load);
+  page.find('.resync').click(function() {
+    self.load(true);
+  });
   page.find('.remove').click(self.remove);
 
   return self;
@@ -171,7 +173,7 @@ function RealServer(options) {
     list: function() {
       return cache.list();
     },
-    load: function(url) {
+    load: function(url, forceReload) {
       var response = jQuery.eventEmitter({});
 
       function loadCachedResponse() {
@@ -183,7 +185,7 @@ function RealServer(options) {
         });
       }
       
-      if (cache.has(url)) {
+      if (cache.has(url) && !forceReload) {
         loadCachedResponse();
         return response;
       }
@@ -257,7 +259,7 @@ $(window).ready(function() {
         url: url,
         server: server
       });
-      page.load();
+      page.load(true);
       clearForm();
     } else {
       jQuery.showErrorMessage("Please enter a URL.");
