@@ -56,17 +56,43 @@ function EtherpadPage(options) {
   page.find('h1').text(url);
   page.find('.open').attr('href', url);
   
+  function updateExcerpt() {
+    var excerpt = "";
+    var title = page.find('.pad-content title');
+    if (title.length) {
+      var firstBodyChild = title.get(0).nextSibling;
+      
+      function tryNextSibling() {
+        if (firstBodyChild.nodeType == firstBodyChild.TEXT_NODE) {
+          excerpt = jQuery.trim(firstBodyChild.textContent);
+        } else if (firstBodyChild.nodeType == firstBodyChild.ELEMENT_NODE) {
+          excerpt = jQuery.trim($(firstBodyChild).text());
+        }
+        if (!excerpt.length && firstBodyChild.nextSibling) {
+          firstBodyChild = firstBodyChild.nextSibling;
+          tryNextSibling();
+        }
+      }
+      
+      tryNextSibling();
+    }
+    listItem.find(".excerpt").text(excerpt);
+  }
+  
   function update(etherpad) {
     if (!listItem) {
+      var loc = getLocation(url);
       listItem = $('#templates .list-item').clone();
       listItem.attr("id", "item-" + id);
       listItem.find("a").attr('href', "#" + id);
-      listItem.find("div.title").text(url);
+      listItem.find(".name").text(loc.pathname.slice(1));
+      listItem.find(".server").text(loc.hostname);
       $("#etherpads").append(listItem);
       $("#etherpads").data('listview').refresh();
     }
     listItem.find(".last-sync").text(etherpad.lastSync.toString());
     page.find('.pad-content').html(etherpad.html);
+    updateExcerpt();
   }
   
   var self = {
@@ -341,7 +367,7 @@ $(window).ready(function() {
 </div>
 <div id="detail-pages"></div>
 <div id="templates" style="display: none">
-  <li class="list-item"><a><div class="title"></div><p class="ui-li-aside">Last synced on <span class="last-sync"></span></p></a></li>
+  <li class="list-item"><a><h3 class="name"></h3><p><strong class="server"></strong></p><p class="excerpt"></p><p class="ui-li-aside">Last synced on <span class="last-sync"></span></p></a></li>
   <div data-role="page" class="detail">
     <div data-role="header">
       <h1>hallo</h1>
