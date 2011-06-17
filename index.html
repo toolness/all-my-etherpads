@@ -57,26 +57,15 @@ function EtherpadPage(options) {
   page.find('.open').attr('href', url);
   
   function updateExcerpt() {
-    var excerpt = "";
-    var title = page.find('.pad-content title');
-    if (title.length) {
-      var firstBodyChild = title.get(0).nextSibling;
-      
-      function tryNextSibling() {
-        if (firstBodyChild.nodeType == firstBodyChild.TEXT_NODE) {
-          excerpt = jQuery.trim(firstBodyChild.textContent);
-        } else if (firstBodyChild.nodeType == firstBodyChild.ELEMENT_NODE) {
-          excerpt = jQuery.trim($(firstBodyChild).text());
-        }
-        if (!excerpt.length && firstBodyChild.nextSibling) {
-          firstBodyChild = firstBodyChild.nextSibling;
-          tryNextSibling();
-        }
-      }
-      
-      tryNextSibling();
+    var excerpt = [];
+    var contents = page.find('.pad-content').contents();
+    for (var i = 0; i < contents.length; i++) {
+      var node = contents.get(i);
+      if (node.nodeName == "BR")
+        break;
+      excerpt.push($(node).text());
     }
-    listItem.find(".excerpt").text(excerpt);
+    listItem.find(".excerpt").text(jQuery.trim(excerpt.join('')));
   }
   
   function update(etherpad) {
@@ -91,7 +80,8 @@ function EtherpadPage(options) {
       $("#etherpads").data('listview').refresh();
     }
     listItem.find(".last-sync").text(etherpad.lastSync.toString());
-    page.find('.pad-content').html(etherpad.html);
+    page.find('.pad-content').html(etherpad.html)
+        .find("title").prevAll().andSelf().remove();
     updateExcerpt();
   }
   
