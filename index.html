@@ -15,6 +15,9 @@ function makeHash(url) {
 }
 
 jQuery.extend({
+  isOffline: function() {
+    return !navigator.onLine;
+  },
   showErrorMessage: function(msg) {
     // Taken from jQuery Mobile's source code.
 		$("<div class='ui-loader ui-overlay-shadow ui-body-e ui-corner-all'>" +
@@ -222,6 +225,8 @@ function BasicServer(options) {
           
           if (jqXHR.status == 404) {
             msg = "No pad exists at that url.";
+          } else if (network.isOffline()) {
+            msg = "You are offline.";
           }
           
           response.emit('error', msg);
