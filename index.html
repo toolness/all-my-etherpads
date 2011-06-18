@@ -9,6 +9,39 @@
 <script src="event-emitter.js"></script>
 <script src="pretty-date.js"></script>
 <script>
+(function installApplicationCacheLoggers() {
+  if (!(window.console && window.console.log &&
+        window.applicationCache))
+    return;
+  
+  var EVENTS = ['cached', 'checking', 'downloading', 'error', 'noupdate', 
+                'obsolete', 'progress', 'updateready'];
+
+  var STATUS_NAMES = {
+    0: "UNCACHED",
+    1: "IDLE",
+    2: "CHECKING",
+    3: "DOWNLOADING",
+    4: "UPDATEREADY",
+    5: "OBSOLETE"
+  };
+
+  var listener = {
+    handleEvent: function(event) {
+      console.log("window.applicationCache fired event '" +
+                  event.type + "', status is " +
+                  STATUS_NAMES[applicationCache.status]);
+    }
+  };
+
+  console.log("window.applicationCache.status is " + 
+              STATUS_NAMES[applicationCache.status]);
+
+  EVENTS.forEach(function(name) {
+    applicationCache.addEventListener(name, listener, false);
+  });
+})();
+
 function makeHash(url) {
   url = url.replace(/[:\/]/g, '_');
   return url.replace(/\./g, "dot");
