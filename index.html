@@ -9,7 +9,7 @@
 <script src="event-emitter.js"></script>
 <script src="pretty-date.js"></script>
 <script>
-(function installApplicationCacheLoggers() {
+(function installApplicationCacheDebugMonitors() {
   if (!window.applicationCache)
     return;
   
@@ -46,6 +46,24 @@
   $(window).ready(function() {
     console.log("window.applicationCache.status is " + status());
     $(".appcache-status").text(status());
+
+    var manifest = $("html").attr("manifest");
+    if (manifest)
+      jQuery.ajax({
+        url: manifest,
+        dataType: "text",
+        success: function(text) {
+          var match = text.match(/# VERSION: (\d+)/);
+          var msg = match ? match[1] : "not found in manifest";
+          $(".manifest-version").text(msg);  
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          var msg = "ERROR, jqXHR.status=" + jqXHR.status + ", " +
+                    "textStatus=" + textStatus + ", " +
+                    "errorThrown=" + errorThrown;
+          $(".manifest-version").text(msg);
+        }
+      });
   });
 
   EVENTS.forEach(function(name) {
@@ -404,10 +422,6 @@ $(window).ready(function() {
 </script>
 <style>
 @import url('jquery.mobile-1.0a4.1.min.css');
-
-.jsliteral {
-  font-family: monospace;
-}
 </style>
 </head>
 <body>
@@ -435,10 +449,13 @@ $(window).ready(function() {
     <div data-role="collapsible" data-collapsed="true">
       <h3>Under The Hood</h3>
       <p>Application Cache Status:
-        <span class="appcache-status jsliteral"></span>
+        <code class="appcache-status"></code>
       </p>
       <p>Last Application Cache Event:
-        <span class="last-appcache-event jsliteral"></span>
+        <code class="last-appcache-event"></code>
+      </p>
+      <p>Current Manifest Version:
+        <code class="manifest-version"></code>
       </p>
     </div>
   </div>

@@ -1,5 +1,10 @@
 CACHE MANIFEST
 
+# The format of the following comment must be preserved, as
+# it's examined by debug code in the app.
+
+# VERSION: 11
+
 favicon.ico
 event-emitter.js
 jquery.min.js
