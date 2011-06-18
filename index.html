@@ -45,7 +45,7 @@ function getQueryVariable(variable) {
 }
 
 setInterval(function() {
-  $("#etherpads .last-sync").prettyDate();
+  $(".last-sync").prettyDate();
 }, 10000);
 
 function EtherpadPage(options) {
@@ -88,8 +88,12 @@ function EtherpadPage(options) {
       $("#etherpads").append(listItem);
       $("#etherpads").data('listview').refresh();
     }
-    listItem.find(".last-sync").attr("title", etherpad.lastSync.toString())
-            .prettyDate();
+    
+    var lastSyncs = listItem.find(".last-sync")
+                            .add(page.find(".last-sync"));
+
+    lastSyncs.attr("title", etherpad.lastSync.toString())
+             .prettyDate();
     page.find('.pad-content').html(etherpad.html)
         .find("title").prevAll().andSelf().remove();
     page.find('.pad-content a').attr("target", "_blank");
@@ -387,7 +391,7 @@ $(window).ready(function() {
   <li class="list-item"><a><h3 class="name"></h3><p><strong class="server"></strong></p><p class="excerpt"></p><p class="ui-li-aside">Last synced <span class="last-sync"></span></p></a></li>
   <div data-role="page" class="detail">
     <div data-role="header">
-      <h1>hallo</h1>
+      <h1></h1>
       <a href="#home" data-icon="home" data-iconpos="notext" data-direction="reverse" class="ui-btn-right jqm-home">Home</a>
     </div>
     <div data-role="content">
@@ -396,6 +400,7 @@ $(window).ready(function() {
         <input type="button" value="Re-Sync" class="resync">
         <input type="button" value="Remove" class="remove">
       </div>
+      <p>This pad was last synced <span class="last-sync"></span>.</p>
       <div class="pad-content"></div>
     </div>
   </div>
