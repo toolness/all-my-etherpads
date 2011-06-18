@@ -10,8 +10,7 @@
 <script src="pretty-date.js"></script>
 <script>
 (function installApplicationCacheLoggers() {
-  if (!(window.console && window.console.log &&
-        window.applicationCache))
+  if (!window.applicationCache)
     return;
   
   var EVENTS = ['cached', 'checking', 'downloading', 'error', 'noupdate', 
@@ -26,16 +25,28 @@
     5: "OBSOLETE"
   };
 
+  var console = window.console || {};
+  
+  if (!console.log)
+    console.log = function() {};
+
+  function status() {
+    return STATUS_NAMES[applicationCache.status];
+  }
+
   var listener = {
     handleEvent: function(event) {
       console.log("window.applicationCache fired event '" +
-                  event.type + "', status is " +
-                  STATUS_NAMES[applicationCache.status]);
+                  event.type + "', status is " + status());
+      $(".appcache-status").text(status());
+      $(".last-appcache-event").text(event.type);
     }
   };
 
-  console.log("window.applicationCache.status is " + 
-              STATUS_NAMES[applicationCache.status]);
+  $(window).ready(function() {
+    console.log("window.applicationCache.status is " + status());
+    $(".appcache-status").text(status());
+  });
 
   EVENTS.forEach(function(name) {
     applicationCache.addEventListener(name, listener, false);
@@ -393,6 +404,10 @@ $(window).ready(function() {
 </script>
 <style>
 @import url('jquery.mobile-1.0a4.1.min.css');
+
+.jsliteral {
+  font-family: monospace;
+}
 </style>
 </head>
 <body>
@@ -417,6 +432,15 @@ $(window).ready(function() {
     <input type="button" value="Export List" id="export-list">
     <h2>About</h2>
     <p><em>All My Etherpads</em> was created by <a href="http://twitter.com/toolness" target="_blank">@toolness</a>. You can learn more about it at the <a href="https://github.com/toolness/all-my-etherpads#readme" target="_blank">github project page</a>.</p>
+    <div data-role="collapsible" data-collapsed="true">
+      <h3>Under The Hood</h3>
+      <p>Application Cache Status:
+        <span class="appcache-status jsliteral"></span>
+      </p>
+      <p>Last Application Cache Event:
+        <span class="last-appcache-event jsliteral"></span>
+      </p>
+    </div>
   </div>
 </div>
 <div id="detail-pages"></div>
