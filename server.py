@@ -38,8 +38,6 @@ def make_app(options):
                 return ['The manifest at ', path, 'exists, but this server ',
                         'is returning 404 because --ignore-cache-manifests is ',
                         'enabled.']
-            else:
-                print "returning existing cache manifest file."
 
             filesize = os.stat(fullpath).st_size
             start_response('200 OK', [('Content-Type', mimetype),
