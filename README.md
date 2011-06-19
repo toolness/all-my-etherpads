@@ -5,7 +5,7 @@ Etherpads are awesome, but they have a few problems:
 * There's no easy way to keep track of all your Etherpads, especially across
   multiple servers.
 
-* Sometimes an Etherpad server goes down.
+* Sometimes an Etherpad server goes down, which is terrifying.
 
 * Accessing an Etherpad on a mobile device isn't fun because the site loads
   very slowly.
