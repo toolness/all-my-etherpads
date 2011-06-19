@@ -3,7 +3,7 @@ CACHE MANIFEST
 # The format of the following comment must be preserved, as
 # it's examined by debug code in the app.
 
-# VERSION: 12
+# VERSION: 13
 
 favicon.ico
 event-emitter.js
