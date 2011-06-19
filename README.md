@@ -13,7 +13,7 @@ Etherpads are awesome, but they have a few problems:
 [All My Etherpads][] is a simple mobile Web app that solves these problems by
 storing HTML versions of your Etherpads for offline viewing.
 
-## Compatibility
+## Browser Compatibility
 
 The app has been tested on the latest desktop and mobile versions of Firefox
 and Safari, as well as the desktop version of Chrome.
